@@ -1,0 +1,59 @@
+
+# Assumes values have been set by parent makefile:
+#
+# BOOST_ROOT : Strelka is currently tested on Boost v1.44
+#
+# REDIST_DIR : location of other dependencies (besides boost)
+#
+# SAMTOOLS_ID : Strelka uses an older version of the samtools library (0.1.8) for bam parsing. This is included in redist/ and should not need to be set.
+# TABIX_ID :
+# CODEMIN_ID : 
+#
+
+IDS := REDIST_DIR BOOST_ID CODEMIN_ID SAMTOOLS_ID TABIX_ID
+
+assert-defined-indirect = $(if $($1),,$(error Variable '$1' must be defined))
+$(foreach I,$(IDS), $(call assert-defined-indirect,$I))
+
+file-exists = $(wildcard $1)
+check-exists-indirect = $(if $(call file-exists,$($1)),,$(error Variable '$1' refers to a non-existent path '$($1)'))
+$(foreach I,REDIST_DIR, $(call check-exists-indirect,$I))
+
+SAMTOOLS_DIR := $(REDIST_DIR)/$(SAMTOOLS_ID)
+TABIX_DIR := $(REDIST_DIR)/$(TABIX_ID)
+CODEMIN_INCLUDE_DIR := $(REDIST_DIR)/$(CODEMIN_ID)/include
+
+CXX := g++
+WARNFLAGS := -Wall
+OPTFLAGS := -O2
+XFLAGS := $(WARNFLAGS) $(OPTFLAGS)
+
+BOOST_REDIST_ROOT := $(REDIST_DIR)/$(BOOST_ID)/stage
+BOOST_INCLUDE_DIR := $(BOOST_REDIST_ROOT)/include
+BOOST_LIB_DIR := $(BOOST_REDIST_ROOT)/lib
+
+STRELKA_INCLUDE_DIR:=$(CURDIR)/include
+
+CXXFLAGS := $(XFLAGS)
+LDFLAGS := $(XFLAGS)
+
+STRELKA_BIN := bin/strelka
+CXX_SRC := bin/strelka.cpp $(wildcard lib/*/*.cpp)
+OBJS := $(patsubst %.cpp,%.o,$(CXX_SRC))
+
+FASTA_BIN := bin/countFastaBases
+
+all: $(STRELKA_BIN) $(FASTA_BIN)
+
+$(STRELKA_BIN): CXXFLAGS += -I$(STRELKA_INCLUDE_DIR) -I$(BOOST_INCLUDE_DIR) -I$(SAMTOOLS_DIR) -I$(TABIX_DIR) -I$(CODEMIN_INCLUDE_DIR)
+$(STRELKA_BIN): LDFLAGS += -L$(BOOST_LIB_DIR) -L$(SAMTOOLS_DIR) -L$(TABIX_DIR)
+$(STRELKA_BIN): LIBFLAGS := -lbam -ltabix -lz -lboost_program_options
+$(STRELKA_BIN): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(LDFLAGS) $(LIBFLAGS) -o $(STRELKA_BIN)
+
+$(FASTA_BIN):
+	$(CXX) $(CXXFLAGS) $(FASTA_BIN).cpp -o $(FASTA_BIN)
+
+clean:
+	$(RM) $(OBJS) $(STRELKA_BIN) $(FASTA_BIN)
+
