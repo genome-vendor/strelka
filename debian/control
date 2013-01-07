@@ -1,0 +1,10 @@
+Source: strelka-0.4.6.2
+Section: science
+Priority: optional
+Build-Depends: debhelper (>= 7)
+Maintainer: The Genome Institute <gmt@genome.wustl.edu>
+
+Package: strelka-0.4.6.2
+Architecture: any
+Depends:
+Description: detect somatic SNVs and small indels from the aligned sequencing reads of matched tumor-normal samples

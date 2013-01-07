@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+VER=0.4.6.2
+PKG_NAME=strelka-${VER}
+DEB_DIR=debian/${PKG_NAME}
+
+%:
+	dh $@
+
+build:
+	make
+
+override_dh_auto_install:
+	mkdir -p ${DEB_DIR}/usr/lib/${PKG_NAME}/bin
+	mkdir -p ${DEB_DIR}/usr/bin
+	for filename in `find bin/ -executable -type f`; do \
+	    file=`basename $${filename}`;   \
+	    install -m 755 $${filename} ${DEB_DIR}/usr/lib/${PKG_NAME}/bin/$${file}; \
+	    echo "export PATH=/usr/lib/${PKG_NAME}/bin/:\$$PATH; exec $$file" > ${DEB_DIR}/usr/bin/$${file}${VER}; \
+	done
+
+
