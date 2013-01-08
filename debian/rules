@@ -13,6 +13,7 @@ build:
 override_dh_auto_install:
 	mkdir -p ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
 	cp -r strelka ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
+	cp -r redist ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
 	cp configureStrelkaWorkflow.pl ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
 	mkdir -p ${DEB_DIR}/usr/bin
 	for filename in `find bin/ -executable -type f`; do \
