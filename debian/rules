@@ -11,11 +11,13 @@ build:
 	make
 
 override_dh_auto_install:
-	mkdir -p ${DEB_DIR}/usr/lib/${PKG_NAME}/bin
+	mkdir -p ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
+	cp -r strelka ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
+	cp configureStrelkaWorkflow.pl ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
 	mkdir -p ${DEB_DIR}/usr/bin
 	for filename in `find bin/ -executable -type f`; do \
 	    file=`basename $${filename}`;   \
-	    install -m 755 $${filename} ${DEB_DIR}/usr/lib/${PKG_NAME}/bin/$${file}; \
+	    install -m 755 $${filename} ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow/strelka/bin/$${file}; \
 	    echo "export PATH=/usr/lib/${PKG_NAME}/bin/:\$$PATH; exec $$file" > ${DEB_DIR}/usr/bin/$${file}${VER}; \
 	done
 
