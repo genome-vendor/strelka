@@ -32,28 +32,34 @@ BOOST_REDIST_ROOT := $(REDIST_DIR)/$(BOOST_ID)/stage
 BOOST_INCLUDE_DIR := $(BOOST_REDIST_ROOT)/include
 BOOST_LIB_DIR := $(BOOST_REDIST_ROOT)/lib
 
-STRELKA_INCLUDE_DIR:=$(CURDIR)/include
+STRELKA_INCLUDE_DIR:=$(CURDIR)/lib
 
 CXXFLAGS := $(XFLAGS)
 LDFLAGS := $(XFLAGS)
 
 STRELKA_BIN := bin/strelka
-CXX_SRC := bin/strelka.cpp $(wildcard lib/*/*.cpp)
-OBJS := $(patsubst %.cpp,%.o,$(CXX_SRC))
+
+VAR_BINS := $(STRELKA_BIN)
+
+SHARED_CXX_DIR := blt_util blt_common common starling_common
+SHARED_CXX_SRC := $(wildcard $(patsubst %,lib/%/*.cpp,$(SHARED_CXX_DIR)))
+SHARED_OBJS := $(patsubst %.cpp,%.o,$(SHARED_CXX_SRC))
+STRELKA_CXX_SRC := bin/strelka.cpp $(wildcard lib/strelka/*.cpp) $(SHARED_CXX_SRC)
+STRELKA_OBJS := $(patsubst %.cpp,%.o,$(STRELKA_CXX_SRC))
 
 FASTA_BIN := bin/countFastaBases
 
 all: $(STRELKA_BIN) $(FASTA_BIN)
 
-$(STRELKA_BIN): CXXFLAGS += -I$(STRELKA_INCLUDE_DIR) -I$(BOOST_INCLUDE_DIR) -I$(SAMTOOLS_DIR) -I$(TABIX_DIR) -I$(CODEMIN_INCLUDE_DIR)
-$(STRELKA_BIN): LDFLAGS += -L$(BOOST_LIB_DIR) -L$(SAMTOOLS_DIR) -L$(TABIX_DIR)
-$(STRELKA_BIN): LIBFLAGS := -lbam -ltabix -lz -lboost_program_options
-$(STRELKA_BIN): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(LDFLAGS) $(LIBFLAGS) -o $(STRELKA_BIN)
+$(VAR_BINS): CXXFLAGS += -I$(STRELKA_INCLUDE_DIR) -I$(BOOST_INCLUDE_DIR) -I$(SAMTOOLS_DIR) -I$(TABIX_DIR) -I$(CODEMIN_INCLUDE_DIR)
+$(VAR_BINS): LIBS := -lbam -ltabix -lz -lboost_program_options
+$(VAR_BINS): LDLIBS += -L$(BOOST_LIB_DIR) -L$(SAMTOOLS_DIR) -L$(TABIX_DIR) $(LIBS)
+$(VAR_BINS): CC := $(CXX)
 
-$(FASTA_BIN):
-	$(CXX) $(CXXFLAGS) $(FASTA_BIN).cpp -o $(FASTA_BIN)
+$(STRELKA_BIN): $(STRELKA_OBJS) $(SHARED_OBJS)
+
+$(FASTA_BIN): $(FASTA_BIN).cpp
 
 clean:
-	$(RM) $(OBJS) $(STRELKA_BIN) $(FASTA_BIN)
+	$(RM) $(STRELKA_OBJS) $(SHARED_OBJS) $(STRELKA_BIN) $(FASTA_BIN)
 

@@ -101,15 +101,18 @@ get_starling_shared_option_parser(starling_options& opt) {
 
     po::options_description indel_opt("indel-options");
     indel_opt.add_options()
-        ("max-candidate-indel-depth", 
+        ("max-candidate-indel-depth",
          po::value<unsigned>(&opt.max_candidate_indel_depth)->default_value(opt.max_candidate_indel_depth),
 "Maximum estimated read depth for an indel to reach candidacy. If any one sample exceeds this depth at the indel, the indel will not reach candidacy in all indel-synchronized samples")
         ("min-candidate-open-length",
          po::value<unsigned>(&opt.min_candidate_indel_open_length)->default_value(opt.min_candidate_indel_open_length),
          "Minimum open-ended breakpoint sequence length required to become a breakpoint candidate")
-         ("candidate-indel-input-vcf",
-          po::value<std::vector<std::string> >(&opt.input_candidate_indel_vcf)->multitoken(),
-          "Add candidate indels from the specified vcf file. Option can be provided multiple times to combine evidence from multiple vcf files.");
+        ("candidate-indel-input-vcf",
+         po::value<std::vector<std::string> >(&opt.input_candidate_indel_vcf)->multitoken(),
+         "Add candidate indels from the specified vcf file. Option can be provided multiple times to combine evidence from multiple vcf files.")
+        ("upstream-oligo-size",
+         po::value<unsigned>(&opt.upstream_oligo_size),
+         "Treat reads as if they have an upstream oligo anchor for purposes of meeting minimum breakpoint overlap in support of an indel.");
 
     po::options_description window_opt("window-options");
     window_opt.add_options()
@@ -123,9 +126,17 @@ get_starling_shared_option_parser(starling_options& opt) {
         ("eland-compatability",
          "When argument is provided the input reads are checked for an optional AS field corresponding to the ELAND PE map score.");
 
+    po::options_description input_opt("input-options");
+    input_opt.add_options()
+        ("max-input-depth", po::value<unsigned>(&opt.max_input_depth),
+         "Maximum allowed read depth per sample (prior to realignment). Input reads which would exceed this depth are filtered out.  (default: no limit)")
+        ("ignore-conflicting-read-names",
+         "Do not report an error if two input reads share the same QNAME and read number");
+;
+
     po::options_description new_opt("New options");
 
-    new_opt.add(hap_opt).add(blt_nonref_opt).add(contig_opt).add(realign_opt).add(indel_opt).add(window_opt).add(compat_opt);
+    new_opt.add(hap_opt).add(blt_nonref_opt).add(contig_opt).add(realign_opt).add(indel_opt).add(window_opt).add(compat_opt).add(input_opt);
 
     return new_opt;
 }
@@ -139,8 +150,8 @@ get_starling_option_parser(starling_options& opt) {
 
     po::options_description help_parse_opt("Help");
     help_parse_opt.add_options()
-        ("help,h","print this message");  
-    
+        ("help,h","print this message");
+
     po::options_description visible("Options");
     visible.add(starling_parse_opt).add(help_parse_opt);
 
@@ -153,8 +164,8 @@ void
 write_starling_legacy_options(std::ostream& os) {
 
     static const starling_options default_opt;
-        
-    os << 
+
+    os <<
         " -bam-file file     - Analyze reads from 'file' in sorted BAM format (required) \n" // (use \"" << STDIN_FILENAME << "\" for stdin)\n"
         " -bam-seq-name name - Analyze reads aligned to chromosome 'name' in the bam file (required)\n"
         " -single-seq-reference file\n"
@@ -352,6 +363,12 @@ finalize_legacy_starling_options(const prog_info& pinfo,
                 pinfo.usage("Contig reads specifed without corresponding contigs.");
             }
         }
+
+        if(is_contigs || is_reads) {
+            if(opt.is_ignore_read_names) {
+                pinfo.usage("Cannot use 'ignore-conflicting-read-names' when indel contigs are specified.");
+            }
+        }
     }
 
     if(opt.is_write_candidate_indels_only &&
@@ -378,6 +395,14 @@ finalize_starling_options(const prog_info& pinfo,
 
     if(vm.count("eland-compatability")) {
         opt.is_eland_compat=true;
+    }
+
+    if(vm.count("max-input-depth")) {
+        opt.is_max_input_depth=true;
+    }
+
+    if(vm.count("ignore-conflicting-read-names")) {
+        opt.is_ignore_read_names=true;
     }
 
     if(vm.count("skip-realignment")) {

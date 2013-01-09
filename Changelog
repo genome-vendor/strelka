@@ -1,3 +1,17 @@
+v0.4.10.1 20130108
+- Allow older config files (pre v0.4.10) to be used without error
+- Improve error message for issue described by T Sandmann
+v0.4.10 20121204
+- fix issue with candidate indel vcf parse
+v0.4.9 20121201
+- find insert sequence by consensus
+v0.4.8 20121120
+- add max input depth filter to bound memory usage in regions of extremely
+high tumor depth
+v0.4.7 20120827
+- add configuration time check and error message for non-standard format fai
+files (required to catch fai files for NCBI 37 distributed with GATK bundle)
+- filter out reads with secondary alignment bit set
 v0.4.6.2 20120609
 - minor bug fix - remove chromosome name parsing bug for ncbi fasta files
 v0.4.6.1 20120609

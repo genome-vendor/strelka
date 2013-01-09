@@ -11,7 +11,7 @@ id-to-dir = $($1)
 DIRS := $(foreach I,$(IDS), $(call id-to-dir,$I))
 
 .PHONY: $(IDS)
-all: $(IDS)
+all: boost $(CODEMIN_ID) samtools tabix vcftools
 
 $(IDS): $(DIRS)
 
@@ -40,21 +40,22 @@ ln -s .. include
 endef
 
 
-BOOST_ID:
-	$(install-boost)
+boost: $(BOOST_ID)
+	$(install-boost) && cd $(CURDIR) && ln -sf $(BOOST_ID) boost
 
-SAMTOOLS_ID:
-	$(MAKE) -C $(call id-to-dir,$@)
+samtools: $(SAMTOOLS_ID)
+	$(MAKE) -C $(SAMTOOLS_ID) && \
 	ln -sf $(SAMTOOLS_ID) samtools
 
-TABIX_ID:
-	$(MAKE) -C $(call id-to-dir,$@)
+tabix: $(TABIX_ID)
+	$(MAKE) -C $(TABIX_ID) && \
+	ln -sf $(TABIX_ID) tabix
 
 # vcftools has a makefile issue preventing recursive make on some linux distros unless MAKEFLAGS is cleared first:
-VCFTOOLS_ID:
-	$(MAKE) -C $(call id-to-dir,$@) MAKEFLAGS=
+vcftools: $(VCFTOOLS_ID)
+	$(MAKE) -C $(VCFTOOLS_ID) MAKEFLAGS= && \
 	ln -sf $(VCFTOOLS_ID) vcftools
 
 clean:
-	$(RM) -rf $(DIRS) samtools tabix vcftools
+	$(RM) -rf $(DIRS) boost samtools tabix vcftools
 

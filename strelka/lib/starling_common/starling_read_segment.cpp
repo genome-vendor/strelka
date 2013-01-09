@@ -132,7 +132,7 @@ read_segment::
 is_any_nonovermax(const unsigned max_indel_size) const {
 
     const read_segment& rseg(*this);
-    if((not rseg.genome_align().empty()) and 
+    if((not rseg.genome_align().empty()) and
        (not rseg.genome_align().is_overmax(max_indel_size))) return true;
 
     typedef contig_align_t cat;
@@ -150,7 +150,7 @@ is_valid() const {
 
     const read_segment& rseg(*this);
     const unsigned rs(rseg.read_size());
-    
+
     if(not rseg.genome_align().empty()) {
         const ALIGNPATH::path_t path(rseg.genome_align().path);
         if(is_apath_invalid(path,rs) or
@@ -177,7 +177,7 @@ short_report(std::ostream& os,
     if(not rseg.genome_align().empty()) os << "GENOME " << rseg.genome_align();
     os << "is_realigned? " << rseg.is_realigned << "\n";
     if(rseg.is_realigned) {
-        os << "REALIGN_path_log_lhood: " << rseg.realign_path_lnp << "\n";
+        //os << "REALIGN_path_log_lhood: " << rseg.realign_path_lnp << "\n";
         os << "REALIGN " << rseg.realignment;
     }
     os << "buffer_pos: " << rseg.buffer_pos << "\n";

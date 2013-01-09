@@ -4,12 +4,12 @@
 
 Copyright (c) 2011 Illumina, Inc.
 
-This software is covered by the "Illumina Genome Analyzer Software 
-License Agreement" and the "Illumina Source Code License Agreement", 
-and certain third party copyright/licenses, and any user of this 
+This software is covered by the "Illumina Genome Analyzer Software
+License Agreement" and the "Illumina Source Code License Agreement",
+and certain third party copyright/licenses, and any user of this
 source file is bound by the terms therein (see accompanying files
 Illumina_Genome_Analyzer_Software_License_Agreement.pdf and
-Illumina_Source_Code_License_Agreement.pdf and third party 
+Illumina_Source_Code_License_Agreement.pdf and third party
 copyright/license notices).
 
 =head1 SYNOPSIS
@@ -159,6 +159,18 @@ sub checkFaIndex($) {
     if(! -f $ifile) {
         errorX("Can't find index for fasta file '$file'");
     }
+    # check that fai file isn't improperly formatted (a la the GATK bundle NCBI 37 fai files)
+    open(my $FH,"< $ifile") || errorX("Can't open fai file '$ifile'");
+    my $lineno=1;
+    while(<$FH>) {
+          chomp;
+          my @F=split();
+          if(scalar(@F) != 5) {
+              errorX("Unexpected format for line number '$lineno' of fasta index file: '$ifile'\n\tRe-running fasta indexing may fix the issue. To do so, run: \"samtools faidx $file\"");
+          }
+          $lineno++;
+    }
+    close($FH);
 }
 
 checkFaIndex($refFile);
@@ -210,11 +222,28 @@ checkMakeDir($outDir);
 # Configure bin runs: open and validate config ini
 #
 my $config = parseConfigIni($configFile);
-for my $key (qw(binSize)) {
-    unless(exists($config->{user}{$key})) {
-        errorX("Config file missing key '$key'");
+
+sub checkConfigKeys($) {
+    my ($keyref) = @_; 
+    for (@$keyref) {
+        errorX("Undefined configuration option: '$_'") unless(defined($config->{user}{$_}));
     }
 }
+
+# these are the keys we need at configuration time:
+my @config_keys = qw(binSize);
+
+# these are additional keys we will need to run the workflow:
+# (note we don't check for maxInputDepth for back compatibility with older config files)
+my @workflow_keys = qw(
+isWriteRealignedBam ssnvPrior sindelPrior ssnvNoise sindelNoise ssnvNoiseStrandBiasFrac
+ssnvQuality_LowerBound sindelQuality_LowerBound isSkipDepthFilters depthFilterMultiple
+snvMaxFilteredBasecallFrac snvMaxSpanningDeletionFrac indelMaxRefRepeat
+indelMaxWindowFilteredBasecallFrac indelMaxIntHpolLength);
+
+checkConfigKeys(\@config_keys);
+checkConfigKeys(\@workflow_keys);
+
 
 my $binSize = int($config->{user}{binSize});
 
@@ -303,7 +332,7 @@ logX("Scanning reference genome");
         my $ln = $chromInfo{$chrom}{size};
         my $rln = $refChromInfo{$chrom}{size};
         unless(defined($rln) && ($rln==$ln)) {
-            errorX("BAM headers and referenence fasta disagree on chromosome: '$chrom'");
+            errorX("BAM headers and reference fasta disagree on chromosome: '$chrom'");
         }
         $config->{derived}{"chrom_${chrom}_size"} = $rln;
         $config->{derived}{"chrom_${chrom}_knownSize"} = $refChromInfo{$chrom}{knownSize};
@@ -505,7 +534,7 @@ $(foreach c,$(chroms), \
  )
 
 ENDE
- 
+
 =cut
 
 

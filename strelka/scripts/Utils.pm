@@ -3,12 +3,12 @@
 
 Copyright (c) 2011 Illumina, Inc.
 
-This software is covered by the "Illumina Genome Analyzer Software 
-License Agreement" and the "Illumina Source Code License Agreement", 
-and certain third party copyright/licenses, and any user of this 
+This software is covered by the "Illumina Genome Analyzer Software
+License Agreement" and the "Illumina Source Code License Agreement",
+and certain third party copyright/licenses, and any user of this
 source file is bound by the terms therein (see accompanying files
 Illumina_Genome_Analyzer_Software_License_Agreement.pdf and
-Illumina_Source_Code_License_Agreement.pdf and third party 
+Illumina_Source_Code_License_Agreement.pdf and third party
 copyright/license notices).
 
 =cut
@@ -160,7 +160,7 @@ sub writeConfigIni($) {
     my $config = shift;
     my $val = "";
     for my $section (sort(keys(%$config))) {
-        $val .= "\n[$section]\n"; 
+        $val .= "\n[$section]\n";
         for my $key (sort(keys(%{$config->{$section}}))) {
             $val .= "$key = " . $config->{$section}{$key} . "\n";
         }

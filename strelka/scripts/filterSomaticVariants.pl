@@ -4,12 +4,12 @@
 
 Copyright (c) 2011 Illumina, Inc.
 
-This software is covered by the "Illumina Genome Analyzer Software 
-License Agreement" and the "Illumina Source Code License Agreement", 
-and certain third party copyright/licenses, and any user of this 
+This software is covered by the "Illumina Genome Analyzer Software
+License Agreement" and the "Illumina Source Code License Agreement",
+and certain third party copyright/licenses, and any user of this
 source file is bound by the terms therein (see accompanying files
 Illumina_Genome_Analyzer_Software_License_Agreement.pdf and
-Illumina_Source_Code_License_Agreement.pdf and third party 
+Illumina_Source_Code_License_Agreement.pdf and third party
 copyright/license notices).
 
 =head1 SYNOPSIS
@@ -168,7 +168,7 @@ if($isUseDepthFilter) {
 
 # add filter description to vcf header unless it already exists
 # return 1 if filter id already exists, client can decide if this is an error
-# 
+#
 sub add_vcf_filter($$$) {
     my ($vcf,$id,$desc) = @_;
     return 1 if(scalar(@{$vcf->get_header_line(key=>'FILTER', ID=>$id)}));
@@ -183,7 +183,7 @@ sub check_vcf_for_sample($$$) {
     for ($vcf->get_samples()) {
         $is_found=1 if($_ eq $sample);
     }
-    errorX("Failed to find sample '$sample' in vcf file '$file'") unless($is_found); 
+    errorX("Failed to find sample '$sample' in vcf file '$file'") unless($is_found);
 }
 
 
@@ -355,7 +355,7 @@ sub filterIndelFileList(\@$$$) {
             my $pos=int($x->{POS});
 
             # get matching line from window file:
-            while((scalar(@a2)<2) or 
+            while((scalar(@a2)<2) or
                   (($a2[0] le $chrom) and (int($a2[1]) < $pos))) {
                 updateA2(@a2,$iwFH);
             }
@@ -372,7 +372,7 @@ sub filterIndelFileList(\@$$$) {
             $tumr->{SUBDP50} = $a2[7];
 
             my %filters;
- 
+
             # normal depth filter:
             my $normalDP=$norm->{DP};
             if($isUseDepthFilter) {

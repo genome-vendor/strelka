@@ -66,7 +66,7 @@ static const bool isBase[128] = {
 struct scan_result {
     scan_result(const char* f)
       : fileName(f), _isSet(false) {}
-    
+
     ~scan_result() { report(); }
 
     void
@@ -81,8 +81,8 @@ struct scan_result {
     void
     report() {
         if(! _isSet) return;
-        report_os << fileName << '\t' 
-                  << contigName << '\t' 
+        report_os << fileName << '\t'
+                  << contigName << '\t'
                   << knownCount << '\t'
                   << totalCount << '\n';
         _isSet=false;
@@ -140,7 +140,7 @@ get_seq_counts(std::istream &ref_is,
         }
 
         if(is_header_wrap) {
-            if(!is_wrap) is_header_wrap=false; // skip the remainder of wrapped header line 
+            if(!is_wrap) is_header_wrap=false; // skip the remainder of wrapped header line
         } else if(buff[0] == '>') {
             if(is_wrap) is_header_wrap=true;
             sr.report();
@@ -158,7 +158,7 @@ get_seq_counts(std::istream &ref_is,
             }
 
             for(const char* b(buff); *b; ++b){
-                if('\r' == *b) continue; //windows fasta files may still have '\r' 
+                if('\r' == *b) continue; //windows fasta files may still have '\r'
                 ++sr.totalCount;
                 if(isBase[static_cast<int8_t>(*b)]) ++sr.knownCount;
             }
@@ -188,7 +188,7 @@ main(int argc,char* argv[]){
 
     if(argc==1) check_get_seq_counts(std::cin,"stdin");
 
-    for (int i(1); i < argc; ++i) { 
+    for (int i(1); i < argc; ++i) {
         if ((i==1) && (helpStrEnd != std::find(helpStr, helpStrEnd, argv[i]))) usage();
         std::ifstream ifs(argv[i]);
         if (!ifs){

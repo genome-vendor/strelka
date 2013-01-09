@@ -72,6 +72,7 @@ fi
 #
 # Step 2: run demo (on single local core):
 #
+#stderrlog=$analysis_dir/make.stderr.log
 cmd="make -C $analysis_dir"
 echo 1>&2
 echo "**** Starting demo workflow execution." 1>&2
@@ -83,10 +84,10 @@ $cmd
 if [ $? -ne 0 ]; then
     cat<<END 1>&2
 
-ERROR: Workflow execution step failed"
-       See execution log files: '$stderrlog' and '$stdoutlog'"
+ERROR: Workflow execution step failed
 
 END
+#        See make error log file: '$stderrlog'
     exit 1
 else
     echo 1>&2
@@ -117,9 +118,9 @@ for f in $(ls $expected_dir); do
     if [ $? -ne 0 ]; then
         cat<<END 1>&2
 
-ERROR: Found difference between demo and expected results in file '$f'."
-       Expected file: $efile"
-       Demo results file: $rfile"
+ERROR: Found difference between demo and expected results in file '$f'.
+       Expected file: $efile
+       Demo results file: $rfile
 
 END
         exit 1

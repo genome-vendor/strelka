@@ -4,12 +4,12 @@
 
 Copyright (c) 2011 Illumina, Inc.
 
-This software is covered by the "Illumina Genome Analyzer Software 
-License Agreement" and the "Illumina Source Code License Agreement", 
-and certain third party copyright/licenses, and any user of this 
+This software is covered by the "Illumina Genome Analyzer Software
+License Agreement" and the "Illumina Source Code License Agreement",
+and certain third party copyright/licenses, and any user of this
 source file is bound by the terms therein (see accompanying files
 Illumina_Genome_Analyzer_Software_License_Agreement.pdf and
-Illumina_Source_Code_License_Agreement.pdf and third party 
+Illumina_Source_Code_License_Agreement.pdf and third party
 copyright/license notices).
 
 =head1 SYNOPSIS
@@ -50,7 +50,7 @@ my $cmdline = join(' ',$0,@ARGV);
 my ($chrom, $binId, $configFile);
 my $help;
 
-GetOptions( 
+GetOptions(
             "chrom=s" => \$chrom,
             "bin=s" => \$binId,
             "config=s" => \$configFile,
@@ -92,6 +92,8 @@ my $config  = parseConfigIni($configFile);
 for (qw(knownGenomeSize tumorBam normalBam refFile outDir)) {
     errorX("Undefined configuration option: '$_'") unless(defined($config->{derived}{$_}));
 }
+
+# note we don't check for maxInputDepth for back compatibility with older config files:
 for (qw(isWriteRealignedBam binSize ssnvPrior sindelPrior
         ssnvNoise sindelNoise ssnvNoiseStrandBiasFrac)) {
     errorX("Undefined configuration option: '$_'") unless(defined($config->{user}{$_}));
@@ -127,7 +129,7 @@ my $useroptions = $config->{user};
 
 
 #
-# setup the strelka command-line: 
+# setup the strelka command-line:
 #
 my $strelka_base_opts= "-clobber" .
 " -filter-unanchored" .
@@ -176,6 +178,12 @@ sub ualignFile($) {
 sub alignFile($) {
     return File::Spec->catfile($binDir,$_[0] . ".realigned");
 }
+
+
+if(exists($useroptions->{maxInputDepth}) && ($useroptions->{maxInputDepth} > 0)) {
+    $cmd .= " --max-input-depth " . $useroptions->{maxInputDepth};
+}
+
 
 if($isWriteRealignedBam) {
     $cmd .= " -realigned-read-file " . ualignFile("normal") .

@@ -55,27 +55,39 @@ add_read_alignment(const starling_options& opt,
     assert(! br.is_unmapped());
 
     const bool is_genomic(READ_ALIGN::GENOME == rat);
-    const read_key tmp_key(br);
-    const read_key_lup_t::const_iterator i(_read_key.find(tmp_key));
-    const bool is_key_found(i!=_read_key.end());
-
     align_id_t this_read_id;
-    if(! is_key_found){
+    bool is_key_found(false);
+
+    if(opt.is_ignore_read_names) {
         this_read_id=next_id();
         _read_data[this_read_id] = new starling_read(br,is_genomic);
     } else {
-        this_read_id=i->second;
+        const read_key tmp_key(br);
+        const read_key_lup_t::const_iterator i(_read_key.find(tmp_key));
+        is_key_found=(i!=_read_key.end());
+
+        if(! is_key_found){
+            this_read_id=next_id();
+            _read_data[this_read_id] = new starling_read(br,is_genomic);
+        } else {
+            this_read_id=i->second;
+        }
+
+        starling_read& sread(*(_read_data[this_read_id]));
+
+        if(! is_key_found) {
+            _read_key[sread.key()]=this_read_id;
+        } else {
+            assert(sread.key() == tmp_key);
+        }
     }
 
     starling_read& sread(*(_read_data[this_read_id]));
 
     if(! is_key_found){
-        _read_key[sread.key()]=this_read_id;
         sread.id() = this_read_id;
 
     } else {
-        assert(sread.key() == tmp_key);
-
         {   // no GROUPER input accepted for reads crossing splice junctions:
             bool is_spliced_contig_read(false);
             if(is_genomic) {
@@ -92,7 +104,7 @@ add_read_alignment(const starling_options& opt,
         }
 
         if(! sread.is_compatible_alignment(al,rat,contig_id,opt)){
-            log_os << "WARNING: skipping new alignment: " << al 
+            log_os << "WARNING: skipping new alignment: " << al
                    << " which is incompatible with alignments in read: " << sread;
             return std::make_pair(false,0);
         }
@@ -177,11 +189,12 @@ get_pos_read_segment_iter(const pos_t pos) {
 
 void
 starling_read_buffer::
-clear_pos(const pos_t pos) {
+clear_pos(const starling_options& opt,
+          const pos_t pos) {
 
     const pos_group_t::iterator i(_pos_group.find(pos));
     if(i == _pos_group.end()) return;
-    
+
     segment_group_t& seg_group(i->second);
     segment_group_t::const_iterator j(seg_group.begin()),j_end(seg_group.end());
     for(;j!=j_end;++j){
@@ -213,7 +226,7 @@ clear_pos(const pos_t pos) {
 
         // remove from simple lookup structures and delete read itself:
         _read_data.erase(k);
-        _read_key.erase(srp->key());
+        if(! opt.is_ignore_read_names) _read_key.erase(srp->key());
         delete srp;
     }
     _pos_group.erase(i);
@@ -229,7 +242,7 @@ dump_pos(const pos_t pos,
     const pos_group_t::const_iterator i(_pos_group.find(pos));
     if(i == _pos_group.end()) return;
 
-    os << "READ_BUFFER_POSITION: " << pos << " DUMP ON\n";    
+    os << "READ_BUFFER_POSITION: " << pos << " DUMP ON\n";
 
     const segment_group_t& seg_group(i->second);
     segment_group_t::const_iterator j(seg_group.begin()),j_end(seg_group.end());
@@ -238,12 +251,12 @@ dump_pos(const pos_t pos,
         const seg_id_t seg_id(j->second);
         const read_data_t::const_iterator k(_read_data.find(read_id));
         if(k == _read_data.end()) continue;
-        
+
         const starling_read& sr(*(k->second));
         os << "READ_BUFFER_POSITION: " << pos << " read_segment_no: " << ++r << " seg_id: " << seg_id << "\n";
         os << sr.get_segment(seg_id);
     }
-    os << "READ_BUFFER_POSITION: " << pos << " DUMP OFF\n";    
+    os << "READ_BUFFER_POSITION: " << pos << " DUMP OFF\n";
 }
 
 

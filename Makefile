@@ -14,8 +14,16 @@ all:
 	$(MAKE) -C $(STRELKA_DIR) && \
         cp $(STRELKA_DIR)/scripts/.$(LAUNCH_SCRIPT) $(LAUNCH_SCRIPT)
 
-clean:
+clean: srcclean
 	$(MAKE) -C $(REDIST_DIR) clean
+
+# developer targets:
+#
+
+# clean only strelka directories but leave redist built:
+srcclean:
 	$(MAKE) -C $(STRELKA_DIR) clean
 	rm -f $(LAUNCH_SCRIPT)
 
+etags:
+	cd $(STRELKA_DIR) && find . -type f -iname "*.[ch]" -or -iname "*.cpp" -or -iname "*.hh" | sed "s/\.\///" | etags -	
