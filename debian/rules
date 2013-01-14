@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 VER=0.4.10.1
-PKG_NAME=strelka-${VER}
+PKG_NAME=strelka${VER}
 DEB_DIR=debian/${PKG_NAME}
 
 %:
