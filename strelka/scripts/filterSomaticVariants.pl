@@ -64,7 +64,14 @@ pod2usage(2) if($help);
 pod2usage(2) unless(defined($chrom));
 pod2usage(2) unless(defined($configFile));
 
-
+# Helper to fix bugs caused by sequence names that contain the | (pipe)
+# character. This does *not* sanitize other potentially troublesome
+# characters.
+sub substitutePipeChar {
+    my $string = shift;
+    $string =~ s/\|/_/g; # replace | with _
+    return $string;
+}
 
 #
 # read config and validate values
@@ -87,7 +94,8 @@ for (qw(binSize ssnvQuality_LowerBound sindelQuality_LowerBound
 }
 
 my $outDir = $config->{derived}{outDir};
-my $chromDir = File::Spec->catdir($outDir,'chromosomes',$chrom);
+my $sanitizedChrom = substitutePipeChar($chrom);
+my $chromDir = File::Spec->catdir($outDir,'chromosomes',$sanitizedChrom);
 checkDir($outDir,"output");
 checkDir($chromDir,"output chromosome");
 

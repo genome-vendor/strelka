@@ -64,6 +64,15 @@ GetOptions( "config=s" => \$configFile,
 pod2usage(2) if($help);
 pod2usage(2) unless(defined($configFile));
 
+# Helper to fix bugs caused by sequence names that contain the | (pipe)
+# character. This does *not* sanitize other potentially troublesome
+# characters.
+sub substitutePipeChar {
+    my $string = shift;
+    $string =~ s/\|/_/g; # replace | with _
+    return $string;
+}
+
 #
 # check fixed paths
 #
@@ -104,7 +113,8 @@ checkDir($outDir,"output");
 my $isWriteRealignedBam = $userconfig->{isWriteRealignedBam};
 
 for my $chrom (@chromOrder) {
-    my $chromDir = File::Spec->catdir($outDir,'chromosomes',$chrom);
+    my $sanitizedChrom = substitutePipeChar($chrom);
+    my $chromDir = File::Spec->catdir($outDir,'chromosomes',$sanitizedChrom);
     checkDir($chromDir,"input chromosome");
 
     next unless($isWriteRealignedBam);
@@ -138,7 +148,8 @@ sub concatenateVcfs($) {
     # loop over all chroms once to create the header, and one more time for all the data:
     my $headervcf;
     for my $chrom (@chromOrder) {
-        my $chromDir = File::Spec->catdir($outDir,'chromosomes',$chrom);
+        my $sanitizedChrom = substitutePipeChar($chrom);
+        my $chromDir = File::Spec->catdir($outDir,'chromosomes',$sanitizedChrom);
         my $iFile = File::Spec->catfile($chromDir,$fileName);
         checkFile($iFile);
 
@@ -173,7 +184,8 @@ sub concatenateVcfs($) {
     $headervcf->close();
 
     for my $chrom (@chromOrder) {
-        my $chromDir = File::Spec->catdir($outDir,'chromosomes',$chrom);
+        my $sanitizedChrom = substitutePipeChar($chrom);
+        my $chromDir = File::Spec->catdir($outDir,'chromosomes',$sanitizedChrom);
         my $iFile = File::Spec->catfile($chromDir,$fileName);
 
         open(my $iFH,'<',"$iFile")
@@ -230,7 +242,8 @@ sub consolidateBam($) {
 
     my @bamList;
     for my $chrom (@chromOrder) {
-        my $chromDir = File::Spec->catdir($outDir,'chromosomes',$chrom);
+        my $sanitizedChrom = substitutePipeChar($chrom);
+        my $chromDir = File::Spec->catdir($outDir,'chromosomes',$sanitizedChrom);
 
         my $chromSizeKey = "chrom_" . $chrom . "_size";
         my $binList = getBinList($config->{derived}{$chromSizeKey},$userconfig->{binSize});

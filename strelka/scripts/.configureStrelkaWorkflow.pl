@@ -108,6 +108,14 @@ GetOptions( "tumor=s" => \$tumorBam,
 usage() if($help);
 usage() unless($argCount);
 
+# Helper to fix bugs caused by sequence names that contain the | (pipe)
+# character. This does *not* sanitize other potentially troublesome
+# characters.
+sub substitutePipeChar {
+    my $string = shift;
+    $string =~ s/\|/_/g; # replace | with _
+    return $string;
+}
 
 #
 # Validate input conditions:
@@ -357,7 +365,8 @@ if($config->{user}{isWriteRealignedBam}) {
 my $chromRootDir = File::Spec->catdir($outDir,'chromosomes');
 checkMakeDir($chromRootDir);
 for my $chrom (@chroms) {
-    my $chromDir = File::Spec->catdir($chromRootDir,$chrom);
+    my $sanitizedChrom = substitutePipeChar($chrom);
+    my $chromDir = File::Spec->catdir($chromRootDir,$sanitizedChrom);
     checkMakeDir($chromDir);
 
     my $chromRef = $chromInfo{$chrom};
@@ -461,11 +470,13 @@ ENDE
 
 for my $chrom (@chroms) {
 
+    my $sanitizedChrom = substitutePipeChar($chrom);
+
     print $MAKEFH <<ENDE;
-chrom_${chrom}_task := \$(call get_chrom_task,$chrom)
-\$(finish_task): \$(chrom_${chrom}_task)
-\$(chrom_${chrom}_task):
-	\$(filter_script) --config=\$(config_file) --chrom=$chrom && touch \$@
+chrom_${sanitizedChrom}_task := \$(call get_chrom_task,$sanitizedChrom)
+\$(finish_task): \$(chrom_${sanitizedChrom}_task)
+\$(chrom_${sanitizedChrom}_task):
+	\$(filter_script) --config=\$(config_file) --chrom='$chrom' && touch \$@
 
 ENDE
 
@@ -480,11 +491,13 @@ ENDE
 for my $chrom (@chroms) {
     for my $bin (@{$chromInfo{$chrom}{binList}}) {
 
+        my $sanitizedChrom = substitutePipeChar($chrom);
+
 print $MAKEFH <<ENDE;
-chrom_${chrom}_bin_${bin}_task := \$(call get_bin_task,$chrom,$bin)
-\$(chrom_${chrom}_task): \$(chrom_${chrom}_bin_${bin}_task)
-\$(chrom_${chrom}_bin_${bin}_task):
-	\$(call_script) --config=\$(config_file) --chrom=$chrom --bin=$bin && touch \$@
+chrom_${sanitizedChrom}_bin_${bin}_task := \$(call get_bin_task,$sanitizedChrom,$bin)
+\$(chrom_${sanitizedChrom}_task): \$(chrom_${sanitizedChrom}_bin_${bin}_task)
+\$(chrom_${sanitizedChrom}_bin_${bin}_task):
+	\$(call_script) --config=\$(config_file) --chrom='$chrom' --bin=$bin && touch \$@
 
 ENDE
 
