@@ -16,6 +16,8 @@ analysis_dir=./strelkaDemoAnalysis
 
 config_script=$root_dir/configureStrelkaWorkflow.pl
 
+demo_config_file=$script_dir/strelka_demo_config.ini
+
 
 
 
@@ -48,7 +50,7 @@ cmd="$config_script \
 --tumor=$data_dir/NA12891_dupmark_chr20_region.bam \
 --normal=$data_dir/NA12892_dupmark_chr20_region.bam \
 --ref=$data_dir/chr20_860k_only.fa \
---config=strelka_demo_config.ini \
+--config=$demo_config_file \
 --output-dir=$analysis_dir"
 
 echo 1>&2
@@ -107,7 +109,7 @@ echo "**** Demo results dir: $results_dir" 1>&2
 echo 1>&2
 
 filter_variable_metadata() {
-    awk '!/^##(fileDate|startTime|cmdline)/'
+    awk '!/^##(fileDate|source_version|startTime|reference|cmdline)/'
 }
 
 for f in $(ls $expected_dir); do

@@ -1,5 +1,5 @@
 
-Strelka -- v0.4.10.1
+Strelka Workflow -- 1.0.7
 ---------------
 
 Christopher Saunders (csaunders@illumina.com)
@@ -66,40 +66,44 @@ Other compilation and runtime prerequisites are included in the distribution
 tarball. These included prerequisites are:
 
 * boost 1.44 (modified to include only the subset of the library used by strelka)
-* samtools 0.1.14 (modified to remove the 'curses' library requirement)
-* vcftools 0.1.6
+* samtools 0.1.18 (modified to remove the 'curses' library requirement)
+* vcftools r837 
 * codemin 1.0.2
 * tabix 0.2.5 (makefile modified to reorder libz library to last place, as required for Ubuntu 12 build)
 
 
-The Makefile included in the strelka workflow tarball will compile both the
-included prerequisite packages and strelka itself. To do this, go to the
-root of the strelka_workflow directory tree and type 'make'.
+The build process for strelka workflow will compile the included prerequisite packages,
+ancillary workflow programs and the strelka variant caller itself. To build the workflow,
+go to the root of the strelka_workflow directory tree and use configure and make as
+in the example below: 
 
 Example build:
 """
-tar -xzf strelka_workflow.tar.gz
-cd strelka_workflow
+tar -xzf strelka_workflow-1.2.3.tar.gz
+cd strelka_workflow-1.2.3
+./configure --prefix=/path/to/install/to
 make
 """
 
-If the installation succeeds the root strelka_workflow directory will
-contain the primary configurataion script:
+If the installation succeeds, all files for the above example will be
+installed to "/path/to/install/to".
 
-configureStrelkaWorkflow.pl
+The final installation step is to run the workflow on the
+demonstration data included in the distribution. This verifies that the
+workflow completes without error and produces the expected answer.
+To do this, first complete the installation steps above. 
 
-This script must remain in the root strelka_workflow directory to run
-correctly. More details on using this script are provided in the
-CONFIGURATION & ANALYSIS section below.
+Next, given a strelka installation path of $STRELKA_INSTALL_DIR, execute
+the following script:
 
-The final installation step is to run the strelka workflow on the
-demostration data included in the distribution to verify that the
-workflow completes and produces the expected answer. To do this, first
-complete the installation steps above, then go into the demo directory
-and execute the script 'run_demo.bash'. The demo runs on a very small
-region of the genome so it should complete quickly (less than a
-minute).  If the 'run_demo.bash' script succeeds, you should see the
-following lines as the final output:
+$STRELKA_INSTALL_DIR/bin/demo/run_demo.bash
+
+The demo will create a 'strelkaDemoAnalysis' directory under the current
+working directory, then it will run an analysis for a very small chromosome
+segment.
+
+The demo should complete in less than a minute.  If the demo script succeeds,
+you should see the following lines as the final output:
 
 """
 **** No differences between expected and computed results.
@@ -122,8 +126,8 @@ a makefile to control the analysis and a directory structure to hold
 all intermediate and final results. All configuration output is
 written to the analysis directory. This step requires a configuration
 initialization file containing strelka's default parameters. Template
-configuration files can be found in the strelka/etc/ subdirectory from
-the strelka_workflow root (see example run setup below).
+configuration files can be found in the etc/ subdirectory under
+the strelka_workflow installation root (see example run setup below).
 
 Following configuration, the makefile can be used to run the analysis
 itself using make, qmake, or a similar tool. For whole genome sequence
@@ -134,7 +138,7 @@ take approximately 50 core-hours.
 
 Example run:
 """
-# example location where strelka was compiled:
+# example location where strelka was installed:
 #
 STRELKA_INSTALL_DIR=/opt/strelka_workflow
 
@@ -149,11 +153,11 @@ cd $WORK_DIR
 # Step 2. Copy configuration ini file from default template set to a local copy,
 #         possibly edit settings in local copy of file:
 #
-cp $STRELKA_INSTALL_DIR/strelka/etc/strelka_config_eland_default.ini config.ini
+cp $STRELKA_INSTALL_DIR/etc/strelka_config_eland_default.ini config.ini
 
 # Step 3. Configure:
 #
-$STRELKA_INSTALL_DIR/configureStrelkaWorkflow.pl --normal=/data/normal.bam --tumor=/data/tumor.bam --ref=/data/reference/hg19.fa --config=config.ini --output-dir=./myAnalysis
+$STRELKA_INSTALL_DIR/bin/configureStrelkaWorkflow.pl --normal=/data/normal.bam --tumor=/data/tumor.bam --ref=/data/reference/hg19.fa --config=config.ini --output-dir=./myAnalysis
 
 # Step 4. Run Analysis
 #         This example is run using 8 cores on the local host:
