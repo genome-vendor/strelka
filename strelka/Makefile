@@ -1,65 +1,42 @@
 
-# Assumes values have been set by parent makefile:
+SRC_DIR := $(CURDIR)/src
+export BIN_DIR := $(CURDIR)/bin
+export REDIST_DIR := $(CURDIR)/redist
+export BOOST_ID := boost_1_53_0_subset
+export CODEMIN_ID := CodeMin-1.0.2
+export SAMTOOLS_ID := samtools-0.1.18_no_tview
+export TABIX_ID := tabix-0.2.5_new_libz_order
+
+# When STRICT_COMPILE is 1, treat compiler warnings as errors:
+export STRICT_COMPILE ?= 1
+
+.PHONY:  all build clean install redist srcclean test etags
+
+all: install test
+
+redist:
+	$(MAKE) -C $(REDIST_DIR)
+
+build: redist
+	$(MAKE) -C $(SRC_DIR)
+
+install: build
+	mkdir -p $(BIN_DIR) && \
+        $(MAKE) -C $(SRC_DIR) $@ 
+
+clean: srcclean
+	$(MAKE) -C $(REDIST_DIR) $@ 
+
+# developer targets:
 #
-# BOOST_ROOT : Strelka is currently tested on Boost v1.44
-#
-# REDIST_DIR : location of other dependencies (besides boost)
-#
-# SAMTOOLS_ID : Strelka uses an older version of the samtools library (0.1.8) for bam parsing. This is included in redist/ and should not need to be set.
-# TABIX_ID :
-# CODEMIN_ID : 
-#
+test: build
+	$(MAKE) -C $(SRC_DIR) $@
 
-IDS := REDIST_DIR BOOST_ID CODEMIN_ID SAMTOOLS_ID TABIX_ID
+# clean only src directories but leave redist built:
+srcclean:
+	$(MAKE) -C $(SRC_DIR) clean
+	$(RM) -r $(BIN_DIR)
 
-assert-defined-indirect = $(if $($1),,$(error Variable '$1' must be defined))
-$(foreach I,$(IDS), $(call assert-defined-indirect,$I))
-
-file-exists = $(wildcard $1)
-check-exists-indirect = $(if $(call file-exists,$($1)),,$(error Variable '$1' refers to a non-existent path '$($1)'))
-$(foreach I,REDIST_DIR, $(call check-exists-indirect,$I))
-
-SAMTOOLS_DIR := $(REDIST_DIR)/$(SAMTOOLS_ID)
-TABIX_DIR := $(REDIST_DIR)/$(TABIX_ID)
-CODEMIN_INCLUDE_DIR := $(REDIST_DIR)/$(CODEMIN_ID)/include
-
-CXX := g++
-WARNFLAGS := -Wall
-OPTFLAGS := -O2
-XFLAGS := $(WARNFLAGS) $(OPTFLAGS)
-
-BOOST_REDIST_ROOT := $(REDIST_DIR)/$(BOOST_ID)/stage
-BOOST_INCLUDE_DIR := $(BOOST_REDIST_ROOT)/include
-BOOST_LIB_DIR := $(BOOST_REDIST_ROOT)/lib
-
-STRELKA_INCLUDE_DIR:=$(CURDIR)/lib
-
-CXXFLAGS := $(XFLAGS)
-LDFLAGS := $(XFLAGS)
-
-STRELKA_BIN := bin/strelka
-
-VAR_BINS := $(STRELKA_BIN)
-
-SHARED_CXX_DIR := blt_util blt_common common starling_common
-SHARED_CXX_SRC := $(wildcard $(patsubst %,lib/%/*.cpp,$(SHARED_CXX_DIR)))
-SHARED_OBJS := $(patsubst %.cpp,%.o,$(SHARED_CXX_SRC))
-STRELKA_CXX_SRC := bin/strelka.cpp $(wildcard lib/strelka/*.cpp) $(SHARED_CXX_SRC)
-STRELKA_OBJS := $(patsubst %.cpp,%.o,$(STRELKA_CXX_SRC))
-
-FASTA_BIN := bin/countFastaBases
-
-all: $(STRELKA_BIN) $(FASTA_BIN)
-
-$(VAR_BINS): CXXFLAGS += -I$(STRELKA_INCLUDE_DIR) -I$(BOOST_INCLUDE_DIR) -I$(SAMTOOLS_DIR) -I$(TABIX_DIR) -I$(CODEMIN_INCLUDE_DIR)
-$(VAR_BINS): LIBS := -lbam -ltabix -lz -lboost_program_options
-$(VAR_BINS): LDLIBS += -L$(BOOST_LIB_DIR) -L$(SAMTOOLS_DIR) -L$(TABIX_DIR) $(LIBS)
-$(VAR_BINS): CC := $(CXX)
-
-$(STRELKA_BIN): $(STRELKA_OBJS) $(SHARED_OBJS)
-
-$(FASTA_BIN): $(FASTA_BIN).cpp
-
-clean:
-	$(RM) $(STRELKA_OBJS) $(SHARED_OBJS) $(STRELKA_BIN) $(FASTA_BIN)
+etags:
+	$(MAKE) -C $(SRC_DIR) $@
 

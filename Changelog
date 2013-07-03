@@ -1,6 +1,27 @@
-v0.4.10.1 20130108
-- Allow older config files (pre v0.4.10) to be used without error
-- Improve error message for issue described by T Sandmann
+v1.0.7 20130525
+- correctly handle complex insertion/deletion events on read edges
+v1.0.6 20130502
+- allow all types of edge indels in input alignments
+v1.0.5 20130414
+- Fix issues causing build to fail when cwd not in PATH
+v1.0.4 20130410
+- Fix issue from Jingtao with incorrect path to vcftools in consolidation
+script
+v1.0.3 20130405
+- Complete change to Illumina Open Source Software License
+- Finalize config settings for Isaac Aligner and add corresponding default
+config file.
+- Update to strelka binary 2.0.5, including option to remap soft-clipped bases
+- STARKA-13 handle CIGAR input with zero-length and PAD segments
+- STARKA-11 update to samtools 0.1.18 so that more reference seqeunce
+variants can be indexed without error.
+- Allow older (pre v0.4.10) config files to be used by defaulting
+maxInputDepth to off state.
+- Include extra error diagnositics based on strelka mailing list case.
+v1.0.0 20121206
+- Begin separate versioning for the strelka binary (STARKA) and the strelka
+perl/makefile workflow. This workflow version should provide the same output
+as v0.4.10.
 v0.4.10 20121204
 - fix issue with candidate indel vcf parse
 v0.4.9 20121201
