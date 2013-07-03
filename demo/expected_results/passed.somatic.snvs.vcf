@@ -1,7 +1,10 @@
 ##fileformat=VCFv4.1
-##fileDate=20120517
+##fileDate=20130116
 ##source=strelka
-##startTime=Thu May 17 18:56:26 2012
+##source_version=2.0.2-29-ged3977a
+##startTime=Wed Jan 16 19:42:09 2013
+##reference=file:///home/csaunders/devel/strelka_workflow/scratch/strelka_workflow-1.0.0-10-g37f7f70/install/bin/demo/data/chr20_860k_only.fa
+##contig=<ID=chr20,length=63025520>
 ##content=strelka somatic snv calls
 ##germlineSnvTheta=0.001
 ##priorSomaticSnvRate=1e-06
@@ -23,7 +26,7 @@
 ##FILTER=<ID=BCNoise,Description="Fraction of basecalls filtered at this site in either sample is at or above 0.4">
 ##FILTER=<ID=SpanDel,Description="Fraction of reads crossing site with spanning deletions in either sample exceeeds 0.75">
 ##FILTER=<ID=QSS_ref,Description="Normal sample is not homozygous ref or ssnv Q-score < 15, ie calls with NT!=ref or QSS_NT < 15">
-##cmdline=/home/csaunders/proj/strelka_paper/strelka_code_distro/tmp/strelka_workflow/strelka/scripts/consolidateResults.pl --config=/home/csaunders/proj/strelka_paper/strelka_code_distro/tmp/strelka_workflow/demo/strelkaDemoAnalysis/config/run.config.ini
+##cmdline=/home/csaunders/devel/strelka_workflow/scratch/strelka_workflow-1.0.0-10-g37f7f70/install/libexec/consolidateResults.pl --config=/home/csaunders/devel/strelka_workflow/scratch/strelka_workflow-1.0.0-10-g37f7f70/install/bin/demo/strelkaDemoAnalysis/config/run.config.ini
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NORMAL	TUMOR
 chr20	863271	.	A	G	.	PASS	NT=ref;QSS=40;QSS_NT=40;SGT=AA->AG;SOMATIC;TQSS=1;TQSS_NT=1	DP:FDP:SDP:SUBDP:AU:CU:GU:TU	26:0:0:0:26,26:0,0:0,0:0,0	18:0:0:0:8,8:0,0:10,10:0,0
 chr20	863508	.	A	G	.	PASS	NT=ref;QSS=68;QSS_NT=68;SGT=AA->AG;SOMATIC;TQSS=1;TQSS_NT=1	DP:FDP:SDP:SUBDP:AU:CU:GU:TU	39:0:0:0:39,39:0,0:0,0:0,0	23:0:0:0:11,11:0,0:12,12:0,0

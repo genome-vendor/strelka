@@ -1,0 +1,54 @@
+#
+# @configure_input@
+#
+
+INSTALL_DIR := @prefix@
+
+export INSTALL_DIR
+
+INSTALL_BIN_DIR = $(INSTALL_DIR)/bin
+INSTALL_LIB_DIR = $(INSTALL_DIR)/lib
+INSTALL_LIBEXEC_DIR = $(INSTALL_DIR)/libexec
+INSTALL_SUBDIR = $(INSTALL_BIN_DIR) $(INSTALL_LIB_DIR) $(INSTALL_LIBEXEC_DIR)
+
+SRC_DIR := $(CURDIR)/src
+STRELKA_DIR := $(CURDIR)/strelka
+REDIST_DIR := $(CURDIR)/redist
+
+.PHONY: all build clean install srcclean test
+
+
+all: install test
+
+$(INSTALL_SUBDIR): build
+	mkdir -p $@
+
+install: $(INSTALL_SUBDIR) build
+	rsync -a $(CURDIR)/etc $(INSTALL_DIR)
+	rsync -a $(CURDIR)/demo $(INSTALL_BIN_DIR)
+	rsync -a $(CURDIR)/redist/ $(INSTALL_DIR)/opt
+	rsync -a $(STRELKA_DIR)/redist/samtools* $(INSTALL_DIR)/opt
+	rsync -a $(STRELKA_DIR)/src/bin/strelka2 $(INSTALL_LIBEXEC_DIR)
+	$(MAKE) -C $(SRC_DIR) $@
+
+test: build
+	STRICT_COMPILE=0 $(MAKE) -C $(STRELKA_DIR) $@
+
+build:
+	$(MAKE) -C $(REDIST_DIR) $@
+	$(MAKE) -C $(SRC_DIR) $@
+	STRICT_COMPILE=0 $(MAKE) -C $(STRELKA_DIR) $@
+
+clean: srcclean
+	$(MAKE) -C $(REDIST_DIR) $@
+	$(MAKE) -C $(STRELKA_DIR) $@
+
+
+# developer targets:
+#
+
+# clean all but redist directory 
+srcclean:
+	$(MAKE) -C $(STRELKA_DIR) srcclean
+	$(MAKE) -C $(SRC_DIR) clean
+
