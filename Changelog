@@ -1,3 +1,10 @@
+v1.0.10 20130719
+- update to starka 2.0.12, fix insertions adjacent to introns (STARKA-34)
+and prevent open-breakend indel output
+v1.0.9 20130704
+- update to starka 2.0.11
+v1.0.8 20130525
+- update to starka 2.0.8
 v1.0.7 20130525
 - correctly handle complex insertion/deletion events on read edges
 v1.0.6 20130502
