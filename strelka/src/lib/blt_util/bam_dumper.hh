@@ -10,12 +10,10 @@
 // <https://github.com/downloads/sequencing/licenses/>.
 //
 
-/// \file
-
 /// \author Chris Saunders
 ///
-#ifndef __BAM_DUMPER_HH
-#define __BAM_DUMPER_HH
+
+#pragma once
 
 extern "C" {
 #include "sam.h"
@@ -28,7 +26,7 @@ struct bam_dumper {
                const bam_header_t* header);
 
     ~bam_dumper() {
-        if(NULL != _bfp) samclose(_bfp);
+        if (NULL != _bfp) samclose(_bfp);
     }
 
     void
@@ -39,6 +37,3 @@ struct bam_dumper {
 private:
     samfile_t* _bfp;
 };
-
-
-#endif
