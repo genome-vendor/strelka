@@ -3,19 +3,20 @@
 VER=1.0.10
 PKG_NAME=strelka${VER}
 DEB_DIR=debian/${PKG_NAME}
+INSTALL_DIR=/tmp/install1
 
 %:
 	dh $@
 
 override_dh_auto_configure:
-	./configure prefix=/tmp/install1
+	./configure prefix=${INSTALL_DIR}
 
 override_build:
 	make # this insists on installing, so we put the install dir in the configure above with a temporary location, and just move them below
 
 override_dh_auto_install:
 	mkdir -p ${DEB_DIR}/usr/lib/${PKG_NAME}
-	cp -a install1/* ${DEB_DIR}/usr/lib/${PKG_NAME}
+	cp -a ${INSTALL_DIR}/* ${DEB_DIR}/usr/lib/${PKG_NAME}
 	chmod +x ${DEB_DIR}/usr/lib/${PKG_NAME}/bin/*
 	chmod +x ${DEB_DIR}/usr/lib/${PKG_NAME}/libexec/*
 	mkdir -p ${DEB_DIR}/usr/bin
