@@ -8,7 +8,7 @@ DEB_DIR=debian/${PKG_NAME}
 	dh $@
 
 override_dh_auto_configure:
-	./configure prefix=$(PWD)/install1
+	./configure prefix=/tmp/install1
 
 override_build:
 	make # this insists on installing, so we put the install dir in the configure above with a temporary location, and just move them below
