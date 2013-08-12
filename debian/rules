@@ -7,19 +7,18 @@ DEB_DIR=debian/${PKG_NAME}
 %:
 	dh $@
 
-build:
-	make
+override_dh_auto_configure:
+	./configure prefix=$(PWD)/install1
+
+override_build:
+	make # this insists on installing, so we put the install dir in the configure above with a temporary location, and just move them below
 
 override_dh_auto_install:
-	mkdir -p ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
-	cp -r strelka ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
-	cp -r redist ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
-	cp configureStrelkaWorkflow.pl ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow
+	mkdir -p ${DEB_DIR}/usr/lib/${PKG_NAME}
+	cp -a install1/* ${DEB_DIR}/usr/lib/${PKG_NAME}
+	chmod +x ${DEB_DIR}/usr/lib/${PKG_NAME}/bin/*
+	chmod +x ${DEB_DIR}/usr/lib/${PKG_NAME}/libexec/*
 	mkdir -p ${DEB_DIR}/usr/bin
-	for filename in `find bin/ -executable -type f`; do \
-	    file=`basename $${filename}`;   \
-	    install -m 755 $${filename} ${DEB_DIR}/usr/lib/${PKG_NAME}/strelka_workflow/strelka/bin/$${file}; \
-	    echo "export PATH=/usr/lib/${PKG_NAME}/bin/:\$$PATH; exec $$file" > ${DEB_DIR}/usr/bin/$${file}${VER}; \
-	done
-
+	echo "export PATH=/usr/lib/${PKG_NAME}/bin/:/usr/lib/${PKG_NAME}/libexec/:\$$PATH; exec /usr/lib/${PKG_NAME}/bin/configureStrelkaWorkflow.pl" > ${DEB_DIR}/usr/bin/strelka${VER}-configureStrelkaWorkflow.pl; \
+	chmod +x ${DEB_DIR}/usr/bin/*
 
