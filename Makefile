@@ -12,7 +12,7 @@ LAUNCH_SCRIPT := configureStrelkaWorkflow.pl
 all:
 	$(MAKE) -C $(REDIST_DIR) && \
 	$(MAKE) -C $(STRELKA_DIR) && \
-        cp $(STRELKA_DIR)/scripts/.$(LAUNCH_SCRIPT) $(LAUNCH_SCRIPT)
+        cp $(STRELKA_DIR)/src/perl/bin/$(LAUNCH_SCRIPT) $(LAUNCH_SCRIPT)
 
 clean: srcclean
 	$(MAKE) -C $(REDIST_DIR) clean
