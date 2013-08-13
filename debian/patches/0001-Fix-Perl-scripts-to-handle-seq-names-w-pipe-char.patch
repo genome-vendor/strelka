@@ -3,11 +3,82 @@ Date: Fri, 9 Aug 2013 16:53:20 -0500
 Subject: [PATCH] Fix Perl scripts to handle seq names w pipe char
 
 ---
- src/perl/libexec/callSomaticVariants.pl   | 12 ++++++++++--
- src/perl/libexec/consolidateResults.pl    | 21 +++++++++++++++++----
- src/perl/libexec/filterSomaticVariants.pl | 12 ++++++++++--
- 3 files changed, 37 insertions(+), 8 deletions(-)
+ src/perl/bin/configureStrelkaWorkflow.pl  | 33 ++++++++++++++++++++-----------
+ src/perl/libexec/callSomaticVariants.pl   | 12 +++++++++--
+ src/perl/libexec/consolidateResults.pl    | 21 ++++++++++++++++----
+ src/perl/libexec/filterSomaticVariants.pl | 12 +++++++++--
+ 4 files changed, 59 insertions(+), 19 deletions(-)
 
+diff --git a/src/perl/bin/configureStrelkaWorkflow.pl b/src/perl/bin/configureStrelkaWorkflow.pl
+index 5c66887..175791d 100755
+--- a/src/perl/bin/configureStrelkaWorkflow.pl
++++ b/src/perl/bin/configureStrelkaWorkflow.pl
+@@ -97,6 +97,15 @@ my $cmdline = join(' ',$0,@ARGV);
+ sub usage() { pod2usage(-verbose => 1,
+                         -exitval => 2); }
+ 
++# Helper to fix bugs caused by sequence names that contain the | (pipe)
++# character. This does *not* sanitize other potentially troublesome
++# characters.
++sub substitutePipeChar {
++    my $string = shift;
++    $string =~ s/\|/_/g; # replace | with _
++    return $string;
++}
++
+ #
+ # user configuration:
+ #
+@@ -371,7 +380,8 @@ for my $chrom (@chroms) {
+     checkMakeDir($binRootDir);
+ 
+     for my $binId ( @{$chromRef->{binList}} ) {
+-        my $binDir = File::Spec->catdir($binRootDir,$binId);
++        my $sanitizedChrom = substitutePipeChar($chrom);
++        my $binDir = File::Spec->catdir($outDir,'chromosomes',$sanitizedChrom,'bins',$binId);
+         checkMakeDir($binDir);
+     }
+ }
+@@ -463,12 +473,12 @@ $(finish_task):
+ ENDE
+ 
+ for my $chrom (@chroms) {
+-
++    my $sanitizedChrom = substitutePipeChar($chrom);
+     print $MAKEFH <<ENDE;
+-chrom_${chrom}_task := \$(call get_chrom_task,$chrom)
+-\$(finish_task): \$(chrom_${chrom}_task)
+-\$(chrom_${chrom}_task):
+-	\$(filter_script) --config=\$(config_file) --chrom=$chrom && touch \$@
++chrom_${sanitizedChrom}_task := \$(call get_chrom_task,$sanitizedChrom)
++\$(finish_task): \$(chrom_${sanitizedChrom}_task)
++\$(chrom_${sanitizedChrom}_task):
++	\$(filter_script) --config=\$(config_file) --chrom='$chrom' && touch \$@
+ 
+ ENDE
+ 
+@@ -480,15 +490,16 @@ print $MAKEFH <<ENDE;
+ #
+ ENDE
+ 
++
+ for my $chrom (@chroms) {
+     for my $bin (@{$chromInfo{$chrom}{binList}}) {
+ 
++       my $sanitizedChrom = substitutePipeChar($chrom);
+ print $MAKEFH <<ENDE;
+-chrom_${chrom}_bin_${bin}_task := \$(call get_bin_task,$chrom,$bin)
+-\$(chrom_${chrom}_task): \$(chrom_${chrom}_bin_${bin}_task)
+-\$(chrom_${chrom}_bin_${bin}_task):
+-	\$(call_script) --config=\$(config_file) --chrom=$chrom --bin=$bin && touch \$@
+-
++chrom_${sanitizedChrom}_bin_${bin}_task := \$(call get_bin_task,$sanitizedChrom,$bin)
++\$(chrom_${sanitizedChrom}_task): \$(chrom_${sanitizedChrom}_bin_${bin}_task)
++\$(chrom_${sanitizedChrom}_bin_${bin}_task):
++	\$(call_script) --config=\$(config_file) --chrom='$chrom' --bin=$bin && touch \$@
+ ENDE
+ 
+     }
 diff --git a/src/perl/libexec/callSomaticVariants.pl b/src/perl/libexec/callSomaticVariants.pl
 index 2cb51fd..522c179 100755
 --- a/src/perl/libexec/callSomaticVariants.pl
