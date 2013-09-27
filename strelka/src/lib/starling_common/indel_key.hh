@@ -7,7 +7,7 @@
 //
 // You should have received a copy of the Illumina Open Source
 // Software License 1 along with this program. If not, see
-// <https://github.com/downloads/sequencing/licenses/>.
+// <https://github.com/sequencing/licenses/>
 //
 
 /// \file
@@ -25,7 +25,7 @@
 #include <iosfwd>
 
 
-// pos here means zero-indexed base following the indel (numerically the same as vcf POS value (+1 for 1-indexing and -1 for preceeding position used in vcf)
+// pos here means zero-indexed base following the indel (numerically the same as vcf POS value (+1 for 1-indexing and -1 for preceding position used in vcf)
 //
 // policy (for now) is that two indels which are the same except for
 // their sorted sequence are treated as the same, the insert sequence

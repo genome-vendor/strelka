@@ -1,3 +1,6 @@
+v1.0.11 20130917
+- update to starka 2.0.13, adding support for time-series analysis (STARKA-23)
+and tolerance for new exon patterns from tophat (STARKA-37)
 v1.0.10 20130719
 - update to starka 2.0.12, fix insertions adjacent to introns (STARKA-34)
 and prevent open-breakend indel output

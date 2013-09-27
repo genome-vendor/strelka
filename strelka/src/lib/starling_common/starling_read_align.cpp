@@ -7,7 +7,7 @@
 //
 // You should have received a copy of the Illumina Open Source
 // Software License 1 along with this program. If not, see
-// <https://github.com/downloads/sequencing/licenses/>.
+// <https://github.com/sequencing/licenses/>
 //
 
 ///
@@ -1222,7 +1222,7 @@ score_candidate_alignments_and_indels(const starling_options& opt,
     {
         score_candidate_alignments(opt,ref,rseg,isync,cal_set,cal_set_path_lnp,max_path_lnp,max_cal_ptr);
     }
-    catch(...)
+    catch (...)
     {
         log_os << "ERROR: exception caught while scoring candidate alignments for read segment: " << rseg;
         throw;
@@ -1250,7 +1250,7 @@ score_candidate_alignments_and_indels(const starling_options& opt,
     {
         score_indels(opt,dopt,sample_opt,rseg,isync,cal_set,is_incomplete_search,cal_set_path_lnp,max_path_lnp,max_cal_ptr);
     }
-    catch(...)
+    catch (...)
     {
         log_os << "ERROR: exception caught while scoring indels for read segment: " << rseg;
         throw;

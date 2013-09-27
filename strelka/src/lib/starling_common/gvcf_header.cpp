@@ -7,7 +7,7 @@
 //
 // You should have received a copy of the Illumina Open Source
 // Software License 1 along with this program. If not, see
-// <https://github.com/downloads/sequencing/licenses/>.
+// <https://github.com/sequencing/licenses/>
 //
 
 /// \file
@@ -105,7 +105,7 @@ add_gvcf_filters(const gvcf_options& opt,
 
 
 // try to determine the sample_name from the BAM header
-// if none found return 'SAMPLE' to be used as sample names
+// if none found return 'SAMPLE' to be used as sample name
 static
 std::string
 determine_sample(const std::string& bam_header_text) {
