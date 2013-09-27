@@ -7,7 +7,7 @@
 //
 // You should have received a copy of the Illumina Open Source
 // Software License 1 along with this program. If not, see
-// <https://github.com/downloads/sequencing/licenses/>.
+// <https://github.com/sequencing/licenses/>
 //
 
 /// \file
@@ -612,6 +612,7 @@ score_indels(const starling_options& opt,
         for (unsigned c(0); si!=si_end; ++si,++c) {
             const candidate_alignment& ical(*si);
             const bool is_max_cal(&ical == &max_cal);
+
             if (cal_set_exclude[c]) {
                 assert(! is_max_cal);
                 continue;
@@ -767,7 +768,7 @@ score_indels(const starling_options& opt,
                         log_os << "ERROR: ";
                     }
 
-                    log_os << "failed to find reference alignement while evaluating read_segment:\n" << rseg << "\n";
+                    log_os << "failed to find reference alignment while evaluating read_segment:\n" << rseg << "\n";
 
                     if (is_safe_mode) {
                         continue;

@@ -7,7 +7,7 @@
 //
 // You should have received a copy of the Illumina Open Source
 // Software License 1 along with this program. If not, see
-// <https://github.com/downloads/sequencing/licenses/>.
+// <https://github.com/sequencing/licenses/>
 //
 
 ///
@@ -131,7 +131,7 @@ struct indel_synchronizer {
     is_candidate_indel(const starling_options& opt,
                        const indel_key& ik) const {
         const indel_data* id_ptr(ibuff().get_indel_data_ptr(ik));
-        if(NULL == id_ptr) find_data_exception(ik);
+        if (NULL == id_ptr) find_data_exception(ik);
         return is_candidate_indel(opt,ik,*id_ptr);
     }
 

@@ -7,7 +7,7 @@
 //
 // You should have received a copy of the Illumina Open Source
 // Software License 1 along with this program. If not, see
-// <https://github.com/downloads/sequencing/licenses/>.
+// <https://github.com/sequencing/licenses/>
 //
 
 /// \file
@@ -30,6 +30,8 @@
 #include "starling_common/align_path.hh"
 #include "starling_common/align_path_bam_util.hh"
 #include "starling_common/starling_pos_processor_util.hh"
+
+#include "boost/foreach.hpp"
 
 #include <cassert>
 
@@ -85,10 +87,8 @@ is_valid_bam_seq(const bam_seq& bs) {
     return true;
 }
 
-
-
 static
-void
+bool
 check_bam_record(const bam_streamer& read_stream,
                  const bam_record& read) {
 
@@ -119,6 +119,12 @@ check_bam_record(const bam_streamer& read_stream,
         const uint8_t* qual(read.qual());
         for (unsigned i(0); i<rs; ++i) {
             try {
+                //for RNAseq work-flow corner case. Reads of length one with '*' q-score
+//                log_os << "qscore " << static_cast<int>(qual[i])<< "\n";
+                if (qual[i]==255) {
+//                    log_os << "\nException for basecall quality score " << static_cast<int>(qual[i])<< "\n";
+                    return false;
+                }
                 qphred_cache::qscore_check(qual[i],"basecall quality");
             } catch (...) {
                 log_os << "\nException for basecall quality score " << static_cast<int>(qual[i]) << " at read position " << (i+1) << "\n";
@@ -127,7 +133,11 @@ check_bam_record(const bam_streamer& read_stream,
             }
         }
     }
+
+    return true;
 }
+
+
 
 
 
@@ -308,10 +318,22 @@ process_genomic_read(const starling_options& opt,
         return;
     }
 
+    if (read.is_supplement()) {
+        brc.supplement++;
+        return;
+    }
+
 
     MAPLEVEL::index_t maplev(get_map_level(opt,read));
 
-    check_bam_record(read_stream,read);
+    // RNAseq modification, qscore 255 used as flag
+    // do not throw exception but rather ignore read
+    // logic implemented in check_bam_record
+    const bool allGood  = check_bam_record(read_stream,read);
+    if (!allGood) {
+//        log_os << "Skipping read " << read << "\n";
+        return;
+    }
 
     // secondary range filter check:
     //   (removed as part of RNA-Seq modifications)
@@ -411,12 +433,11 @@ common_xfix_length(const std::string& s1,
 void
 process_candidate_indel(const vcf_record& vcf_indel,
                         starling_pos_processor_base& sppr,
-                        const unsigned sample_no) {
+                        const unsigned sample_no,
+                        const bool is_forced_output) {
 
     const unsigned rs(vcf_indel.ref.size());
-    const unsigned nalt(vcf_indel.alt.size());
-    for (unsigned a(0); a<nalt; ++a) {
-        const std::string& alt(vcf_indel.alt[a]);
+    BOOST_FOREACH(const std::string& alt, vcf_indel.alt) {
         const unsigned as(alt.size());
         const std::pair<unsigned,unsigned> xfix(common_xfix_length(vcf_indel.ref,alt));
         const unsigned nfix(xfix.first+xfix.second);
@@ -445,6 +466,7 @@ process_candidate_indel(const vcf_record& vcf_indel,
         }
 
         obs.data.is_external_candidate = true;
+        obs.data.is_forced_output = is_forced_output;
         sppr.insert_indel(obs,sample_no);
     }
 }
